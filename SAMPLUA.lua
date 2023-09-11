@@ -1,5 +1,5 @@
 script_name("SAMPLUA")
-script_version("1.00")
+script_version("2.00")
 
 local sampev = require 'lib.samp.events'
 local imgui = require 'imgui'
@@ -27,9 +27,9 @@ function imgui.OnDrawFrame()
       imgui.SetNextWindowSize(imgui.ImVec2(430, 110), imgui.Cond.FirstUseEver) 
       imgui.SetNextWindowPos(imgui.ImVec2(sizeX / 2, sizeY / 2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
       imgui.Begin('Information for bot', main_window_state, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoScrollbar)
-      imgui.Text(u8'Справка бот реагирует на слова: бот слап, бот лопату, бот спавн')
-      imgui.Text(u8'бот машину, бот люкс, бот нрг, бот флип, бот аб, бот цр, бот цб')
-      imgui.Text(u8'бот хп, бот унфриз, бот маверик, бот шамал, бот гидру, бот броник.')
+      imgui.Text(u8'Г‘ГЇГ°Г ГўГЄГ  ГЎГ®ГІ Г°ГҐГ ГЈГЁГ°ГіГҐГІ Г­Г  Г±Г«Г®ГўГ : ГЎГ®ГІ Г±Г«Г ГЇ, ГЎГ®ГІ Г«Г®ГЇГ ГІГі, ГЎГ®ГІ Г±ГЇГ ГўГ­')
+      imgui.Text(u8'ГЎГ®ГІ Г¬Г ГёГЁГ­Гі, ГЎГ®ГІ Г«ГѕГЄГ±, ГЎГ®ГІ Г­Г°ГЈ, ГЎГ®ГІ ГґГ«ГЁГЇ, ГЎГ®ГІ Г ГЎ, ГЎГ®ГІ Г¶Г°, ГЎГ®ГІ Г¶ГЎ')
+      imgui.Text(u8'ГЎГ®ГІ ГµГЇ, ГЎГ®ГІ ГіГ­ГґГ°ГЁГ§, ГЎГ®ГІ Г¬Г ГўГҐГ°ГЁГЄ, ГЎГ®ГІ ГёГ Г¬Г Г«, ГЎГ®ГІ ГЈГЁГ¤Г°Гі, ГЎГ®ГІ ГЎГ°Г®Г­ГЁГЄ.')
       imgui.End()
     end
   end
