@@ -1,5 +1,5 @@
 script_name("SAMPLUA")
-script_version("3.00")
+script_version("1.00")
 
 local sampev = require 'lib.samp.events'
 local imgui = require 'imgui'
@@ -11,9 +11,99 @@ u8 = encoding.UTF8
 local main_window_state = imgui.ImBool(false)
 local sizeX, sizeY = getScreenResolution()
 
+
+function autoupdate(json_url, prefix, url)
+  lua_thread.create(function()
+      local dlstatus = require('moonloader').download_status
+      local json = getWorkingDirectory() .. '\\'..thisScript().name..'-version.json'
+      if doesFileExist(json) then os.remove(json) end
+      downloadUrlToFile(json_url, json,
+      function(id, status, p1, p2)
+          if status == dlstatus.STATUSEX_ENDDOWNLOAD then
+          if doesFileExist(json) then
+              local f = io.open(json, 'r')
+              if f then
+              local info = decodeJson(f:read('*a'))
+              updatelink = info.updateurl
+              updateversion = info.latest
+              f:close()
+              os.remove(json)
+              if updateversion ~= thisScript().version then
+                  lua_thread.create(function(prefix)
+                  local dlstatus = require('moonloader').download_status
+                  local color = -1
+                  msg('Обнаружено обновление. Пытаюсь обновиться c '..thisScript().version..' на '..updateversion)
+                  wait(250)
+                  downloadUrlToFile(updatelink, thisScript().path,
+                      function(id3, status1, p13, p23)
+                      if status1 == dlstatus.STATUS_DOWNLOADINGDATA then
+                          print(string.format('Загружено %d из %d.', p13, p23))
+                      elseif status1 == dlstatus.STATUS_ENDDOWNLOADDATA then
+                          print('Загрузка обновления завершена.')
+                          msg('Обновление завершено!')
+                          goupdatestatus = true
+                          lua_thread.create(function() wait(500) thisScript():reload() end)
+                      end
+                      if status1 == dlstatus.STATUSEX_ENDDOWNLOAD then
+                          if goupdatestatus == nil then
+                          msg('Обновление прошло неудачно. Запускаю устаревшую версию.')
+                          update = false
+                          end
+                      end
+                      end
+                  )
+                  end, prefix
+                  )
+              else
+                  update = false
+                  msg('Обновление не требуется.')
+              end
+              end
+          else
+              msg('Не могу проверить обновление. Смиритесь или проверьте самостоятельно на '..url)
+              update = false
+          end
+          end
+      end
+      )
+      while update ~= false do wait(100) end
+  end)
+end
+
 function main()
     if not isSampLoaded() or not isSampfuncsLoaded() then return end
     while not isSampAvailable() do wait(0) end
+    if not doesDirectoryExist('moonloader/config/Ghetto Helper') then createDirectory('moonloader/config/Ghetto Helper') end
+    if not doesFileExist(getWorkingDirectory()..'/config/Ghetto Helper/Ghetto Helper.ini') then inicfg.save(cfg, 'Ghetto Helper/Ghetto Helper.ini') end
+    if not doesFileExist(getWorkingDirectory()..'/config/Ghetto Helper/bell.wav') then
+        downloadUrlToFile('https://github.com/Venibon/Ghetto-Helper/raw/main/bell.wav', getWorkingDirectory()..'/config/Ghetto Helper/bell.wav')
+    end
+    if not doesFileExist(getWorkingDirectory()..'/resource/fonts/fontawesome-webfont.tt') then 
+        downloadUrlToFile('https://github.com/Venibon/Ghetto-Helper/raw/main/fontawesome-webfont.ttf', getWorkingDirectory()..'/resource/fonts/fontawesome-webfont.tt')
+    end
+        imgui.Process = false
+        local json = getWorkingDirectory() .. '\\'..thisScript().name..'-version.json'
+        if doesFileExist(json) then os.remove(json) end
+        downloadUrlToFile('https://raw.githubusercontent.com/astral-raze/tes/main/TEST.json', json,
+          function(id, status, p1, p2)
+            if status == dlstatus.STATUSEX_ENDDOWNLOAD then
+              if doesFileExist(json) then
+                local f = io.open(json, 'r')
+                if f then
+                  local info = decodeJson(f:read('*a'))
+                  updateversion = info.latest
+                  f:close()
+                  os.remove(json)
+                end
+              end
+            end
+        end)
+        msg('Загружен! Автор VRush. Открыть меню: /'..cfg.config.CommandAct)         
+        if cfg.config.AutoUpdate == 1 then
+            autoupdate("https://raw.githubusercontent.com/astral-raze/tes/main/TEST.json", '['..string.upper(thisScript().name)..']: ', "https://www.blast.hk/threads/138165/")
+        elseif cfg.config.AutoUpdate == 2 then
+            msg('Автообновление было выключено, проверьте обновление в Главном меню')
+        end
     sampRegisterChatCommand('banana', function ()  main_window_state.v = not  main_window_state.v end)
 while true do
     wait(0)
@@ -27,9 +117,7 @@ function imgui.OnDrawFrame()
       imgui.SetNextWindowSize(imgui.ImVec2(430, 110), imgui.Cond.FirstUseEver) 
       imgui.SetNextWindowPos(imgui.ImVec2(sizeX / 2, sizeY / 2), imgui.Cond.FirstUseEver, imgui.ImVec2(0.5, 0.5))
       imgui.Begin('Information for bot', main_window_state, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoScrollbar)
-      imgui.Text(u8'Г‘ГЇГ°Г ГўГЄГ  ГЎГ®ГІ Г°ГҐГ ГЈГЁГ°ГіГҐГІ Г­Г  Г±Г«Г®ГўГ : ГЎГ®ГІ Г±Г«Г ГЇ, ГЎГ®ГІ Г«Г®ГЇГ ГІГі, ГЎГ®ГІ Г±ГЇГ ГўГ­')
-      imgui.Text(u8'ГЎГ®ГІ Г¬Г ГёГЁГ­Гі, ГЎГ®ГІ Г«ГѕГЄГ±, ГЎГ®ГІ Г­Г°ГЈ, ГЎГ®ГІ ГґГ«ГЁГЇ, ГЎГ®ГІ Г ГЎ, ГЎГ®ГІ Г¶Г°, ГЎГ®ГІ Г¶ГЎ')
-      imgui.Text(u8'ГЎГ®ГІ ГµГЇ, ГЎГ®ГІ ГіГ­ГґГ°ГЁГ§, ГЎГ®ГІ Г¬Г ГўГҐГ°ГЁГЄ, ГЎГ®ГІ ГёГ Г¬Г Г«, ГЎГ®ГІ ГЈГЁГ¤Г°Гі, ГЎГ®ГІ ГЎГ°Г®Г­ГЁГЄ.')
+      imgui.Text(u8'ПРОВЕРКА АВТО ОБНОВЛЕНИЯ НУ ПИЗДЕЦ КТО ЭТОТ LUA ПРИДУМАЛ')
       imgui.End()
     end
   end
